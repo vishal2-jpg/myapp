@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CRUD App</title>
+</head>
+<body>
+
+<h2>CRUD App</h2>
+
+<input id="name" placeholder="Enter name">
+<button onclick="add()">Add</button>
+
+<ul id="list"></ul>
+
+<script>
+const API = "http://54.242.40.171:3000";
+
+async function load() {
+  const res = await fetch(API + "/items");
+  const data = await res.json();
+  document.getElementById("list").innerHTML = data.map(item =>
+    `<li>
+      ${item.name}
+      <button onclick="del(${item.id})">Delete</button>
+      <button onclick="edit(${item.id})">Edit</button>
+    </li>`
+  ).join('');
+}
+
+async function add() {
+  const name = document.getElementById("name").value;
+  await fetch(API + "/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name })
+  });
+  load();
+}
+
+async function del(id) {
+  await fetch(API + "/delete/" + id, { method: "DELETE" });
+  load();
+}
+
+async function edit(id) {
+  const name = prompt("New name:");
+  await fetch(API + "/update/" + id, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name })
+  });
+  load();
+}
+
+load();
+</script>
+
+</body>
+</html>
