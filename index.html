@@ -1,16 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>CRUD App</title>
+  <meta charset="UTF-8">
+  <title>CRUD Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: white;
+    }
+
+    header {
+      padding: 20px;
+      text-align: center;
+      background: #1e293b;
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background: #1e293b;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+    }
+
+    button {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .add-btn {
+      background: #22c55e;
+      color: white;
+    }
+
+    .add-btn:hover {
+      background: #16a34a;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 25px;
+    }
+
+    li {
+      background: #334155;
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .actions button {
+      margin-left: 5px;
+    }
+
+    .edit {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .delete {
+      background: #ef4444;
+      color: white;
+    }
+
+    .edit:hover { background: #2563eb; }
+    .delete:hover { background: #dc2626; }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+  </style>
 </head>
 <body>
 
-<h2>CRUD App</h2>
+<header>🚀 CRUD Dashboard</header>
 
-<input id="name" placeholder="Enter name">
-<button onclick="add()">Add</button>
+<div class="container">
 
-<ul id="list"></ul>
+  <div class="input-group">
+    <input id="name" placeholder="Enter item name..." />
+    <button class="add-btn" onclick="add()">Add</button>
+  </div>
+
+  <ul id="list"></ul>
+
+</div>
+
+<footer>
+  Powered by Node.js + MySQL + Jenkins CI/CD
+</footer>
 
 <script>
 const API = "http://32.192.71.224:3000";
@@ -18,22 +129,34 @@ const API = "http://32.192.71.224:3000";
 async function load() {
   const res = await fetch(API + "/items");
   const data = await res.json();
-  document.getElementById("list").innerHTML = data.map(item =>
-    `<li>
-      ${item.name}
-      <button onclick="del(${item.id})">Delete</button>
-      <button onclick="edit(${item.id})">Edit</button>
-    </li>`
-  ).join('');
+
+  document.getElementById("list").innerHTML =
+    data.map(item => `
+      <li>
+        <span>${item.name}</span>
+        <div class="actions">
+          <button class="edit" onclick="edit(${item.id})">Edit</button>
+          <button class="delete" onclick="del(${item.id})">Delete</button>
+        </div>
+      </li>
+    `).join('');
 }
 
 async function add() {
   const name = document.getElementById("name").value;
+
+  if (!name) {
+    alert("Please enter a value");
+    return;
+  }
+
   await fetch(API + "/add", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name })
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({name})
   });
+
+  document.getElementById("name").value = "";
   load();
 }
 
@@ -43,12 +166,15 @@ async function del(id) {
 }
 
 async function edit(id) {
-  const name = prompt("New name:");
+  const name = prompt("Update item:");
+  if (!name) return;
+
   await fetch(API + "/update/" + id, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name })
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({name})
   });
+
   load();
 }
 
@@ -57,4 +183,3 @@ load();
 
 </body>
 </html>
-<!-- CI/CD TEST -->
